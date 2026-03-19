@@ -62,7 +62,11 @@ export class StorageService {
   generateKey(folder: string, fileName: string): string {
     const timestamp = Date.now();
     const sanitizedFolder = folder.replace(/[^a-zA-Z0-9\-_]/g, '_');
-    const sanitizedName = fileName.replace(/[^a-zA-Z0-9\-_]/g, '_');
-    return `${sanitizedFolder}/${timestamp}-${sanitizedName}`;
+    const lastDot = fileName.lastIndexOf('.');
+    const baseName = lastDot !== -1 ? fileName.slice(0, lastDot) : fileName;
+    const extension = lastDot !== -1 ? fileName.slice(lastDot) : '';
+    const sanitizedBase = baseName.replace(/[^a-zA-Z0-9\-_]/g, '_');
+    const sanitizedExt = extension.replace(/[^a-zA-Z0-9.]/g, '');
+    return `${sanitizedFolder}/${timestamp}-${sanitizedBase}${sanitizedExt}`;
   }
 }

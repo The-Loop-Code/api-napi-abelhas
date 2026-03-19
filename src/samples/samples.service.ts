@@ -18,15 +18,21 @@ export class SamplesService {
   }
 
   async create(dto: CreateSampleDto) {
+    const MAX_RETRIES = 10;
     let registrationCode: string;
     let isUnique = false;
+    let attempts = 0;
 
     do {
+      if (attempts >= MAX_RETRIES) {
+        throw new Error('Failed to generate a unique registration code after maximum retries');
+      }
       registrationCode = this.generateRegistrationCode();
       const existing = await this.prisma.sample.findUnique({
         where: { registrationCode },
       });
       isUnique = !existing;
+      attempts++;
     } while (!isUnique);
 
     return this.prisma.sample.create({
