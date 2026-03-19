@@ -13,6 +13,7 @@ Documentação técnica do projeto **api-napi-abelhas**, uma API REST para geren
 | 3 | [Configurações de Ambiente](./03-configuracoes-de-ambiente.md) | Variáveis de ambiente, Docker Compose, Prisma e boas práticas de segurança |
 | 4 | [Produção x Desenvolvimento](./04-producao-x-desenvolvimento.md) | Diferenças entre ambientes, scripts, banco, storage, checklist de deploy |
 | 5 | [Justificativas de Ferramentas](./05-justificativas-de-ferramentas.md) | Por que NestJS, Prisma, Zod, Clerk, PostgreSQL, Redis, MinIO, Jest e mais |
+| 6 | [Arquitetura](./06-arquitetura.md) | Princípios Clean, DRY, SOLID e Modular — definição das camadas Controller, Service, DTO e Repository |
 
 ---
 
