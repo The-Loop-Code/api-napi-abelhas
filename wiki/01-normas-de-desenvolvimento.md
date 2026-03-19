@@ -77,7 +77,20 @@ async update(id: string, dto: UpdateFooDto) {
 ## 5. Tratamento de Erros
 
 - Use as exceções HTTP nativas do NestJS (`NotFoundException`, `BadRequestException`, `ForbiddenException`, etc.) nos serviços.
-- Todas as respostas de erro passam pelo `HttpExceptionFilter` global, que padroniza o formato:
+- O `AllExceptionsFilter` global (registrado no `main.ts`) captura **todas** as exceções:
+  - **`HttpException`** → retorna o status code e body da exceção.
+  - **`PrismaClientKnownRequestError`** → mapeado por código Prisma:
+    - `P2002` → 409 Conflict (violação de unique)
+    - `P2003` → 400 Bad Request (violação de foreign key)
+    - `P2025` → 404 Not Found (registro não encontrado)
+    - `P2014` → 400 Bad Request (violação de relação obrigatória)
+    - `P2018` → 404 Not Found (registro relacionado não encontrado)
+    - `P2000` → 400 Bad Request (valor longo demais para coluna)
+  - **`PrismaClientValidationError`** → 400 Bad Request.
+  - **`PrismaClientInitializationError`** → 503 Service Unavailable.
+  - **Qualquer outra exceção** → retorna `500 Internal server error`, sem vazar stack trace ou detalhes internos.
+- Erros 5xx são logados como `error` (com stack trace) e erros 4xx como `warn` via Pino.
+- Formato padronizado de resposta de erro:
 
 ```json
 {
@@ -89,6 +102,22 @@ async update(id: string, dto: UpdateFooDto) {
 ```
 
 - Nunca lance `Error` genérico em serviços — sempre use as classes de exceção do `@nestjs/common`.
+
+---
+
+## 5.1 Documentação da API (Swagger / OpenAPI)
+
+A API conta com documentação interativa gerada automaticamente pelo `@nestjs/swagger`.
+
+- **URL local**: `http://localhost:3000/api/docs`
+- Configurada no `main.ts` via `DocumentBuilder` + `SwaggerModule`.
+- O `addBearerAuth()` documenta a autenticação JWT nos endpoints protegidos.
+- Para enriquecer a documentação, use decorators do Swagger nos Controllers:
+  - `@ApiTags('producers')` — agrupa rotas.
+  - `@ApiOperation({ summary: '...' })` — descreve a operação.
+  - `@ApiBearerAuth()` — marca a rota como autenticada.
+  - `@ApiResponse({ status: 200, description: '...' })` — documenta respostas.
+- Em produção, considere desabilitar o Swagger com base em `NODE_ENV`.
 
 ---
 

@@ -26,6 +26,8 @@ Validação     Zod 4
 Auth          Clerk (JWT / JWKS) + Passport
 Cache         Redis 7 + @nestjs/cache-manager
 Storage       MinIO (S3-compatível) + @aws-sdk/client-s3
+Logger        Pino (nestjs-pino) — NDJSON estruturado
+Docs API      Swagger / OpenAPI (@nestjs/swagger)
 Infra local   Docker Compose
 Testes        Jest + ts-jest + Supertest
 Lint/Format   ESLint 9 + Prettier 3 + typescript-eslint
@@ -38,25 +40,25 @@ Lint/Format   ESLint 9 + Prettier 3 + typescript-eslint
 ```
 src/
 ├── app.module.ts              # Módulo raiz — registra todos os módulos
+├── app.controller.ts          # Health check (GET /api/v1/health)
 ├── main.ts                    # Bootstrap da aplicação
 ├── config/
 │   └── env.schema.ts          # Validação de variáveis de ambiente (Zod)
 ├── prisma/
 │   └── prisma.service.ts      # Wrapper global do PrismaClient
-├── auth/                      # Autenticação Clerk (JWT + Guards + Roles)
-├── common/
-│   ├── filters/               # HttpExceptionFilter — padronização de erros
+├── common/                    # Compartilhado globalmente
+│   ├── decorators/            # @CurrentUser(), @Roles()
+│   ├── guards/                # ClerkAuthGuard, RolesGuard
+│   ├── filters/               # AllExceptionsFilter — erros HTTP + Prisma + logging estruturado (Pino)
 │   └── pipes/                 # ZodValidationPipe — validação de DTOs
+├── auth/                      # Estratégia JWT Clerk + webhook
+│   └── strategies/            # ClerkJwtStrategy (passport-jwt + JWKS)
 ├── storage/                   # Presigned URLs (MinIO/S3)
-├── producers/                 # CRUD de produtores
-├── samples/                   # CRUD de amostras
-├── analysis/                  # CRUD de análises
-├── abelhas/                   # CRUD de espécies de abelhas
-├── pontos-coleta/             # CRUD de pontos de coleta
-├── responsaveis/              # CRUD de responsáveis
-├── cidades-ibge/              # Referência de cidades do IBGE
-├── tipos-amostra/             # Tipos de amostra (lookup)
-└── tipos-analise/             # Tipos de análise (lookup)
+└── modules/                   # Módulos de domínio (futuro)
+    ├── producers/             # CRUD de produtores
+    ├── samples/               # CRUD de amostras
+    ├── analysis/              # CRUD de análises
+    └── ...                    # demais módulos
 prisma/
 └── schema.prisma              # Schema do banco de dados
 docker-compose.yml             # PostgreSQL + Redis + MinIO

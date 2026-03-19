@@ -34,8 +34,7 @@ CLERK_JWKS_URI=https://api.clerk.com/v1/jwks
 
 # ─── Aplicação ────────────────────────────────────────────────────────────────
 PORT=3000
-NODE_ENV=development
-```
+NODE_ENV=developmentLOG_LEVEL=info```
 
 ---
 
@@ -58,6 +57,7 @@ NODE_ENV=development
 | `CLERK_JWKS_URI`      | Não         | `https://api.clerk.com/v1/jwks`     | URI do JWKS para validação dos JWTs                    |
 | `PORT`                | Não         | `3000`                              | Porta em que a API escuta                              |
 | `NODE_ENV`            | Não         | `development`                       | Ambiente: `development`, `production` ou `test`        |
+| `LOG_LEVEL`           | Não         | `info`                              | Nível de log do Pino: `fatal`, `error`, `warn`, `info`, `debug`, `trace` |
 
 ---
 

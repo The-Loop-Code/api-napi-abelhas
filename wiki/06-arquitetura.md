@@ -316,7 +316,7 @@ PostgreSQL
 Resposta HTTP (201 Created)
 ```
 
-Em caso de erro em qualquer etapa, o `HttpExceptionFilter` global intercepta a exceção e retorna uma resposta padronizada.
+Em caso de erro em qualquer etapa, o `AllExceptionsFilter` global intercepta a exceção, loga via Pino (5xx como `error`, 4xx como `warn`) e retorna uma resposta padronizada.
 
 ---
 

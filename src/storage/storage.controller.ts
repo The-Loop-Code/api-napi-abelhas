@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
-import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
+import { ClerkAuthGuard } from '@/common/guards/clerk-auth.guard';
+import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { z } from 'zod';
 
 const uploadUrlSchema = z.object({

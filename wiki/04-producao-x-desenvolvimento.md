@@ -89,13 +89,33 @@ O `StorageService` é agnóstico ao serviço — usa a SDK da AWS (`@aws-sdk/cli
 
 ## 7. Logging e Monitoramento
 
-| Aspecto              | Desenvolvimento                        | Produção                                  |
-|----------------------|----------------------------------------|-------------------------------------------|
-| Logs                 | Console padrão do NestJS               | Integrar com solução centralizada (ex.: Loki, CloudWatch) |
-| Erros não tratados   | Stack trace visível no console         | Ocultar stack trace nas respostas HTTP    |
-| Métricas             | Não configurado                        | Adicionar health check (`/health`) e métricas |
+O projeto usa **Pino** (via `nestjs-pino`) como logger estruturado, substituíndo o console padrão do NestJS.
 
-O `HttpExceptionFilter` já padroniza as respostas de erro. Em produção, considere não expor mensagens de erro internas ao cliente.
+| Aspecto              | Desenvolvimento                                        | Produção                                            |
+|----------------------|--------------------------------------------------------|----------------------------------------------------|
+| Formato de log       | `pino-pretty` — colorido, single-line, timestamps legíveis | JSON puro (NDJSON) em stdout                       |
+| Transporte           | Console local                                          | stdout → Docker → Loki/Grafana, ELK, CloudWatch    |
+| Nível (default)       | `info` (configurável via `LOG_LEVEL`)                   | `info` (configurável via `LOG_LEVEL`)               |
+| Headers sensíveis    | Censurados (`authorization`, `cookie`, `set-cookie`)   | Censurados (redact do Pino)                        |
+| Erros não tratados   | Stack trace visível no console (colorido)               | Stack trace logado em JSON, **não** exposto na resposta HTTP |
+| Erros 4xx            | Logados como `warn`                                    | Logados como `warn`                                |
+| Erros 5xx            | Logados como `error` (com stack trace)                 | Logados como `error` (com stack trace)             |
+
+### Variáveis de ambiente
+
+| Variável    | Valores                                              | Default |
+|-------------|------------------------------------------------------|---------|
+| `LOG_LEVEL` | `fatal`, `error`, `warn`, `info`, `debug`, `trace`  | `info`  |
+
+### Exemplo de saída em produção (NDJSON)
+
+```json
+{"level":30,"time":1711036800000,"pid":1,"hostname":"container-id","req":{"method":"GET","url":"/api/v1/health"},"res":{"statusCode":200},"responseTime":12,"msg":"request completed"}
+```
+
+Esse formato é consumido diretamente por coletores como **Promtail** (Grafana Loki), **Fluentd/Fluent Bit** (ELK), ou **CloudWatch Logs Agent** (AWS).
+
+O `AllExceptionsFilter` integra com o Pino para garantir que todo erro HTTP (4xx/5xx) é logado estruturadamente com contexto (path, status code, stack trace).
 
 ---
 

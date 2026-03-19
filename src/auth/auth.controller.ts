@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ClerkAuthGuard } from './guards/clerk-auth.guard';
-import { CurrentUser } from './decorators/current-user.decorator';
+import { ClerkAuthGuard } from '@/common/guards/clerk-auth.guard';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import type { ClerkJwtPayload } from './strategies/clerk-jwt.strategy';
 import type { Request } from 'express';
 

@@ -179,7 +179,45 @@ Usar os dois integrados (via `eslint-config-prettier` + `eslint-plugin-prettier`
 
 ---
 
-## 11. Jest (Testes)
+## 11. Pino / nestjs-pino (Logging Estruturado)
+
+**Por que Pino?**
+
+| Vantagem | Detalhe |
+|----------|--------|
+| Performance | Um dos loggers mais rápidos do ecossistema Node.js (low overhead) |
+| NDJSON nativo | Saída JSON estruturada por linha — consumível diretamente por Loki, ELK, CloudWatch |
+| Redact de dados sensíveis | Censura automática de headers como `authorization` e `cookie` |
+| `pino-pretty` para dev | Logs coloridos e legíveis em desenvolvimento, JSON puro em produção |
+| Integração com NestJS | `nestjs-pino` substitui o logger padrão — o `Logger` do `@nestjs/common` delega para Pino automaticamente |
+| Docker-friendly | stdout puro → Docker logs → Promtail/Fluentd — sem filesystem nem rotator |
+
+**Alternativas consideradas:**
+- **Winston**: Mais popular, mas significativamente mais lento e com serialização JSON menos eficiente.
+- **Console padrão do NestJS**: Sem estruturação JSON, sem redact, sem níveis configuráveis — inadequado para ambientes containerizados.
+- **Bunyan**: Obsoleto, sem manutenção ativa.
+
+---
+
+## 12. Swagger / OpenAPI (@nestjs/swagger)
+
+**Por que Swagger?**
+
+| Vantagem | Detalhe |
+|----------|---------|
+| Documentação automática | Gera documentação interativa a partir dos Controllers e DTOs |
+| Teste de endpoints | Interface web em `/api/docs` permite testar rotas diretamente no navegador |
+| Auth integrado | `addBearerAuth()` documenta e permite testar endpoints protegidos por JWT |
+| Padrão da indústria | OpenAPI é o padrão para documentação de APIs REST |
+| Integração NestJS | `@nestjs/swagger` extrai informações de rotas, parâmetros e respostas automaticamente |
+
+**Alternativas consideradas:**
+- **Documentação manual (Markdown/Postman)**: Tende a ficar desatualizada rapidamente conforme a API evolui.
+- **Redoc**: Melhor apresentação visual, mas sem funcionalidade de testes embutida.
+
+---
+
+## 13. Jest (Testes)
 
 **Por que Jest?**
 

@@ -26,6 +26,8 @@ O projeto segue uma arquitetura **Clean**, **DRY**, **SOLID** e **Modular**, com
 | [MinIO](https://min.io/) | Object storage (S3-compatível) para laudos |
 | [Clerk](https://clerk.com/) | Autenticação e IAM via JWT Guards |
 | [Zod](https://zod.dev/) | Validação de payloads via Custom Pipes |
+| [Pino](https://getpino.io/) + [nestjs-pino](https://github.com/iamolegga/nestjs-pino) | Logging estruturado JSON (NDJSON) — compatível com Docker, Loki/Grafana, ELK |
+| [Swagger / OpenAPI](https://swagger.io/) | Documentação interativa da API em `/api/docs` |
 | [Docker Compose](https://docs.docker.com/compose/) | Orquestração dos serviços de infraestrutura |
 
 ## 📦 Módulos
@@ -45,7 +47,7 @@ src/
 ├── config/             # Validação de variáveis de ambiente com Zod
 └── common/
     ├── pipes/          # ZodValidationPipe
-    └── filters/        # HttpExceptionFilter
+    └── filters/        # AllExceptionsFilter (erros HTTP + Prisma + logging)
 ```
 
 ## 🚀 Início Rápido
@@ -187,7 +189,63 @@ npm run test:watch
 npm run test:cov
 ```
 
-## 🐳 MinIO Console
+## � Documentação Interativa (Swagger)
+
+Com o servidor rodando, acesse a documentação interativa da API em:
+
+```
+http://localhost:3000/api/docs
+```
+
+A documentação é gerada automaticamente pelo `@nestjs/swagger` e inclui autenticação JWT via `Bearer` token.
+
+## 📋 Logging Estruturado (Pino)
+
+O projeto usa **Pino** via `nestjs-pino` para logging estruturado em JSON (NDJSON).
+
+| Ambiente | Formato | Transporte |
+|---|---|---|
+| `development` | Colorido e legível (`pino-pretty`) | Console |
+| `production` | JSON puro (NDJSON) | stdout → Docker → Loki/Grafana, ELK, CloudWatch |
+
+Variáveis de ambiente:
+
+| Variável | Valores | Default |
+|---|---|---|
+| `LOG_LEVEL` | `fatal`, `error`, `warn`, `info`, `debug`, `trace` | `info` |
+
+Headers sensíveis (`authorization`, `cookie`, `set-cookie`) são automaticamente censurados nos logs.
+
+Exemplo de saída em produção (NDJSON):
+```json
+{"level":30,"time":1711036800000,"pid":1,"hostname":"container-id","req":{"method":"GET","url":"/api/v1/health"},"res":{"statusCode":200},"responseTime":12,"msg":"request completed"}
+```
+
+## ⚠️ Tratamento de Erros
+
+O `AllExceptionsFilter` global captura **todas** as exceções e retorna respostas padronizadas:
+
+| Tipo de Exceção | Status | Exemplo |
+|---|---|---|
+| `HttpException` do NestJS | Status da exceção | `NotFoundException` → 404 |
+| `PrismaClientKnownRequestError` | Mapeado por código | `P2002` → 409 Conflict, `P2025` → 404 |
+| `PrismaClientValidationError` | 400 | Dados inválidos no Prisma |
+| `PrismaClientInitializationError` | 503 | Banco indisponível |
+| Qualquer outra exceção | 500 | Sem vazamento de detalhes internos |
+
+Formato padronizado:
+```json
+{
+  "statusCode": 404,
+  "timestamp": "2026-03-19T12:00:00.000Z",
+  "path": "/api/v1/producers/123",
+  "message": "Producer with id 123 not found"
+}
+```
+
+Erros 5xx são logados como `error` (com stack trace) e erros 4xx como `warn` via Pino.
+
+## �🐳 MinIO Console
 
 Acesse o console do MinIO em `http://localhost:9001` com:
 - **Usuário:** `minioadmin`
