@@ -21,7 +21,7 @@ export class AuthController {
     @Headers() headers: Record<string, string>,
   ) {
     const payload = req.rawBody?.toString() ?? '';
-    const event = await this.authService.verifyWebhook(payload, headers);
+    const event = this.authService.verifyWebhook(payload, headers);
     await this.authService.handleWebhookEvent(event);
     return { received: true };
   }

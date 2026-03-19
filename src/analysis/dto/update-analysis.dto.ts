@@ -6,9 +6,17 @@ export const updateAnalysisSchema = z.object({
   result: z.string().optional(),
   conclusion: z.string().optional(),
   analyst: z.string().optional(),
-  startedAt: z.string().transform((val) => new Date(val)).optional(),
-  completedAt: z.string().transform((val) => new Date(val)).optional(),
-  status: z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  startedAt: z
+    .string()
+    .transform((val) => new Date(val))
+    .optional(),
+  completedAt: z
+    .string()
+    .transform((val) => new Date(val))
+    .optional(),
+  status: z
+    .enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+    .optional(),
 });
 
 export type UpdateAnalysisDto = z.infer<typeof updateAnalysisSchema>;

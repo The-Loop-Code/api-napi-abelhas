@@ -25,7 +25,9 @@ export class SamplesService {
 
     do {
       if (attempts >= MAX_RETRIES) {
-        throw new Error('Failed to generate a unique registration code after maximum retries');
+        throw new Error(
+          `Failed to generate a unique registration code after ${MAX_RETRIES} retries. Please try again or contact support.`,
+        );
       }
       registrationCode = this.generateRegistrationCode();
       const existing = await this.prisma.sample.findUnique({

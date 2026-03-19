@@ -22,7 +22,9 @@ export class ProducersController {
   constructor(private readonly producersService: ProducersService) {}
 
   @Post()
-  create(@Body(new ZodValidationPipe(createProducerSchema)) dto: CreateProducerDto) {
+  create(
+    @Body(new ZodValidationPipe(createProducerSchema)) dto: CreateProducerDto,
+  ) {
     return this.producersService.create(dto);
   }
 

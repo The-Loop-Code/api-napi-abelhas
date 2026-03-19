@@ -22,7 +22,9 @@ export class AnalysisController {
   constructor(private readonly analysisService: AnalysisService) {}
 
   @Post()
-  create(@Body(new ZodValidationPipe(createAnalysisSchema)) dto: CreateAnalysisDto) {
+  create(
+    @Body(new ZodValidationPipe(createAnalysisSchema)) dto: CreateAnalysisDto,
+  ) {
     return this.analysisService.create(dto);
   }
 

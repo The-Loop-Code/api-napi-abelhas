@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { StorageService } from './storage.service';
 import { ClerkAuthGuard } from '../auth/guards/clerk-auth.guard';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe';
@@ -26,16 +21,21 @@ export class StorageController {
 
   @Post('upload-url')
   async getUploadUrl(
-    @Body(new ZodValidationPipe(uploadUrlSchema)) body: z.infer<typeof uploadUrlSchema>,
+    @Body(new ZodValidationPipe(uploadUrlSchema))
+    body: z.infer<typeof uploadUrlSchema>,
   ) {
     const key = this.storageService.generateKey(body.folder, body.fileName);
-    const url = await this.storageService.getUploadPresignedUrl(key, body.contentType);
+    const url = await this.storageService.getUploadPresignedUrl(
+      key,
+      body.contentType,
+    );
     return { url, key };
   }
 
   @Post('download-url')
   async getDownloadUrl(
-    @Body(new ZodValidationPipe(downloadUrlSchema)) body: z.infer<typeof downloadUrlSchema>,
+    @Body(new ZodValidationPipe(downloadUrlSchema))
+    body: z.infer<typeof downloadUrlSchema>,
   ) {
     const url = await this.storageService.getDownloadPresignedUrl(body.key);
     return { url };

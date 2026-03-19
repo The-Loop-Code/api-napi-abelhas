@@ -20,11 +20,13 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async verifyWebhook(
+  verifyWebhook(
     payload: string,
     headers: Record<string, string>,
-  ): Promise<ClerkWebhookEvent> {
-    const webhookSecret = this.configService.get<string>('CLERK_WEBHOOK_SECRET');
+  ): ClerkWebhookEvent {
+    const webhookSecret = this.configService.get<string>(
+      'CLERK_WEBHOOK_SECRET',
+    );
     if (!webhookSecret) {
       throw new UnauthorizedException('Webhook secret not configured');
     }
@@ -41,10 +43,12 @@ export class AuthService {
   async handleWebhookEvent(event: ClerkWebhookEvent): Promise<void> {
     switch (event.type) {
       case 'user.created': {
-        const emailAddress = event.data.email_addresses?.[0]?.email_address ?? '';
-        const name = [event.data.first_name, event.data.last_name]
-          .filter(Boolean)
-          .join(' ') || emailAddress;
+        const emailAddress =
+          event.data.email_addresses?.[0]?.email_address ?? '';
+        const name =
+          [event.data.first_name, event.data.last_name]
+            .filter(Boolean)
+            .join(' ') || emailAddress;
 
         await this.prisma.user.upsert({
           where: { clerkId: event.data.id },
@@ -58,10 +62,12 @@ export class AuthService {
         break;
       }
       case 'user.updated': {
-        const emailAddress = event.data.email_addresses?.[0]?.email_address ?? '';
-        const name = [event.data.first_name, event.data.last_name]
-          .filter(Boolean)
-          .join(' ') || emailAddress;
+        const emailAddress =
+          event.data.email_addresses?.[0]?.email_address ?? '';
+        const name =
+          [event.data.first_name, event.data.last_name]
+            .filter(Boolean)
+            .join(' ') || emailAddress;
 
         await this.prisma.user.updateMany({
           where: { clerkId: event.data.id },

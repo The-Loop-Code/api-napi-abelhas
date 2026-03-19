@@ -22,7 +22,9 @@ export class SamplesController {
   constructor(private readonly samplesService: SamplesService) {}
 
   @Post()
-  create(@Body(new ZodValidationPipe(createSampleSchema)) dto: CreateSampleDto) {
+  create(
+    @Body(new ZodValidationPipe(createSampleSchema)) dto: CreateSampleDto,
+  ) {
     return this.samplesService.create(dto);
   }
 

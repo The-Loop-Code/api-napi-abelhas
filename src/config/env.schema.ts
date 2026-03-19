@@ -15,7 +15,9 @@ export const envSchema = z.object({
   CLERK_WEBHOOK_SECRET: z.string().optional(),
   CLERK_JWKS_URI: z.string().default('https://api.clerk.com/v1/jwks'),
   PORT: z.coerce.number().default(3000),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
