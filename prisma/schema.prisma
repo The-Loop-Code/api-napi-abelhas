@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  TECHNICIAN
+  RESEARCHER
+}
+
+enum ProducerType {
+  APICULTOR
+  MELIPONICULTOR
+}
+
+enum BeeType {
+  APIS_MELLIFERA
+  MELIPONINI
+  OTHER
+}
+
+enum SampleType {
+  MEL
+  POLEN
+  PROPOLIS
+  CERA
+}
+
+enum SampleStatus {
+  RECEIVED
+  IN_ANALYSIS
+  COMPLETED
+  REJECTED
+}
+
+enum AnalysisStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String
+  role      Role     @default(RESEARCHER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Producer {
+  id        String       @id @default(cuid())
+  name      String
+  document  String
+  email     String
+  phone     String
+  type      ProducerType
+  address   String
+  city      String
+  state     String
+  latitude  Float?
+  longitude Float?
+  radius    Float?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  samples   Sample[]
+  apiaries  Apiary[]
+}
+
+model Apiary {
+  id         String   @id @default(cuid())
+  name       String
+  latitude   Float
+  longitude  Float
+  altitude   Float?
+  city       String
+  state      String
+  producerId String
+  producer   Producer @relation(fields: [producerId], references: [id])
+  samples    Sample[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Sample {
+  id               String       @id @default(uuid())
+  registrationCode String       @unique
+  beeType          BeeType
+  sampleType       SampleType
+  status           SampleStatus @default(RECEIVED)
+  collectionDate   DateTime
+  receivedAt       DateTime     @default(now())
+  producerId       String
+  producer         Producer     @relation(fields: [producerId], references: [id])
+  apiaryId         String?
+  apiary           Apiary?      @relation(fields: [apiaryId], references: [id])
+  storageLocation  String?
+  notes            String?
+  analyses         Analysis[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Analysis {
+  id          String         @id @default(cuid())
+  sampleId    String
+  sample      Sample         @relation(fields: [sampleId], references: [id])
+  type        String
+  parameters  Json?
+  result      String?
+  conclusion  String?
+  analyst     String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  status      AnalysisStatus @default(PENDING)
+  reports     Report[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  analysisId   String
+  analysis     Analysis @relation(fields: [analysisId], references: [id])
+  fileName     String
+  fileKey      String
+  fileUrl      String?
+  uploadedBy   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
