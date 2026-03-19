@@ -30,7 +30,12 @@ export class AnalysisService {
   async findOne(id: string) {
     const analysis = await this.prisma.analise.findUnique({
       where: { id },
-      include: { amostra: true, tipoAnalise: true, responsavel: true, fileGroup: true },
+      include: {
+        amostra: true,
+        tipoAnalise: true,
+        responsavel: true,
+        fileGroup: true,
+      },
     });
     if (!analysis) {
       throw new NotFoundException(`Analise with id ${id} not found`);

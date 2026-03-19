@@ -1,28 +1,39 @@
 import {
   Controller,
+  Get,
   Post,
   Headers,
   Req,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { ClerkAuthGuard } from './guards/clerk-auth.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
+import type { ClerkJwtPayload } from './strategies/clerk-jwt.strategy';
 import type { Request } from 'express';
 
-@Controller('webhook')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('clerk')
+  @Get('me')
+  @UseGuards(ClerkAuthGuard)
+  me(@CurrentUser() user: ClerkJwtPayload) {
+    return user;
+  }
+
+  @Post('webhook/clerk')
   @HttpCode(HttpStatus.OK)
-  async handleClerkWebhook(
+  handleClerkWebhook(
     @Req() req: RawBodyRequest<Request>,
     @Headers() headers: Record<string, string>,
   ) {
     const payload = req.rawBody?.toString() ?? '';
     const event = this.authService.verifyWebhook(payload, headers);
-    await this.authService.handleWebhookEvent(event);
+    this.authService.handleWebhookEvent(event);
     return { received: true };
   }
 }

@@ -38,7 +38,27 @@ export class AuthService {
     }
   }
 
-  async handleWebhookEvent(event: ClerkWebhookEvent): Promise<void> {
-    this.logger.log(`Received webhook event: ${event.type} for user ${event.data.id}`);
+  handleWebhookEvent(event: ClerkWebhookEvent): void {
+    const { type, data } = event;
+    const email = data.email_addresses?.[0]?.email_address ?? 'unknown';
+    const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
+
+    switch (type) {
+      case 'user.created':
+        this.logger.log(
+          `User created — id: ${data.id}, email: ${email}, name: ${name}`,
+        );
+        break;
+      case 'user.updated':
+        this.logger.log(
+          `User updated — id: ${data.id}, email: ${email}, name: ${name}`,
+        );
+        break;
+      case 'user.deleted':
+        this.logger.log(`User deleted — id: ${data.id}`);
+        break;
+      default:
+        this.logger.warn(`Unhandled webhook event type: ${type}`);
+    }
   }
 }

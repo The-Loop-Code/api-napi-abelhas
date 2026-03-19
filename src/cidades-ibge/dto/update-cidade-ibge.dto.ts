@@ -1,17 +1,50 @@
 import { z } from 'zod';
 
 const estadoValues = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
-  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
-  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ] as const;
 
 const regiaoValues = [
-  'NORTE', 'NORDESTE', 'CENTRO_OESTE', 'SUDESTE', 'SUL',
+  'NORTE',
+  'NORDESTE',
+  'CENTRO_OESTE',
+  'SUDESTE',
+  'SUL',
 ] as const;
 
 const biomaValues = [
-  'AMAZONIA', 'CERRADO', 'MATA_ATLANTICA', 'CAATINGA', 'PAMPA', 'PANTANAL',
+  'AMAZONIA',
+  'CERRADO',
+  'MATA_ATLANTICA',
+  'CAATINGA',
+  'PAMPA',
+  'PANTANAL',
 ] as const;
 
 export const updateCidadeIbgeSchema = z.object({
