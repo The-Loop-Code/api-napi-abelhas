@@ -1,13 +1,12 @@
 import { z } from 'zod';
 
 export const createSampleSchema = z.object({
-  beeType: z.enum(['APIS_MELLIFERA', 'MELIPONINI', 'OTHER']),
-  sampleType: z.enum(['MEL', 'POLEN', 'PROPOLIS', 'CERA']),
-  collectionDate: z.string().transform((val) => new Date(val)),
-  producerId: z.string().min(1),
-  apiaryId: z.string().optional(),
-  storageLocation: z.string().optional(),
-  notes: z.string().optional(),
+  nome: z.string().min(1),
+  dataColeta: z.string().transform((val) => new Date(val)),
+  pontoColetaId: z.string().min(1),
+  abelhaId: z.string().min(1),
+  produtorId: z.string().min(1),
+  tipoAmostraId: z.string().min(1),
 });
 
 export type CreateSampleDto = z.infer<typeof createSampleSchema>;

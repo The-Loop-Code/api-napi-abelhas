@@ -8,29 +8,29 @@ export class ProducersService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateProducerDto) {
-    return this.prisma.producer.create({ data: dto });
+    return this.prisma.produtor.create({ data: dto });
   }
 
   async findAll() {
-    return this.prisma.producer.findMany({
-      orderBy: { createdAt: 'desc' },
+    return this.prisma.produtor.findMany({
+      include: { cidade: true },
     });
   }
 
   async findOne(id: string) {
-    const producer = await this.prisma.producer.findUnique({
+    const producer = await this.prisma.produtor.findUnique({
       where: { id },
-      include: { samples: true, apiaries: true },
+      include: { cidade: true, amostras: true },
     });
     if (!producer) {
-      throw new NotFoundException(`Producer with id ${id} not found`);
+      throw new NotFoundException(`Produtor with id ${id} not found`);
     }
     return producer;
   }
 
   async update(id: string, dto: UpdateProducerDto) {
     await this.findOne(id);
-    return this.prisma.producer.update({
+    return this.prisma.produtor.update({
       where: { id },
       data: dto,
     });
@@ -38,6 +38,6 @@ export class ProducersService {
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.producer.delete({ where: { id } });
+    return this.prisma.produtor.delete({ where: { id } });
   }
 }

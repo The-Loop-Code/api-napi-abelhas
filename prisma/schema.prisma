@@ -1,138 +1,194 @@
+datasource db {
+  provider = "postgresql"
+}
+
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+enum Estado {
+  AC
+  AL
+  AP
+  AM
+  BA
+  CE
+  DF
+  ES
+  GO
+  MA
+  MT
+  MS
+  MG
+  PA
+  PB
+  PR
+  PE
+  PI
+  RJ
+  RN
+  RS
+  RO
+  RR
+  SC
+  SP
+  SE
+  TO
 }
 
-enum Role {
-  ADMIN
-  TECHNICIAN
-  RESEARCHER
+enum Regiao {
+  NORTE
+  NORDESTE
+  CENTRO_OESTE
+  SUDESTE
+  SUL
 }
 
-enum ProducerType {
-  APICULTOR
-  MELIPONICULTOR
+enum Bioma {
+  AMAZONIA
+  CERRADO
+  MATA_ATLANTICA
+  CAATINGA
+  PAMPA
+  PANTANAL
 }
 
-enum BeeType {
-  APIS_MELLIFERA
-  MELIPONINI
-  OTHER
+enum FileType {
+  IMAGE
+  TEXTO
+  PDF
+  OUTROS
 }
 
-enum SampleType {
-  MEL
-  POLEN
-  PROPOLIS
-  CERA
+model CidadesIBGE {
+  id         String @id @default(uuid())
+  codigoIBGE String @unique
+  cidade     String
+  estado     Estado
+  regiao     Regiao
+  bioma      Bioma?
+
+  produtores     Produtor[]
+  responsaveis   Responsavel[]
+  pontosDeColeta PontoColeta[]
 }
 
-enum SampleStatus {
-  RECEIVED
-  IN_ANALYSIS
-  COMPLETED
-  REJECTED
+model Produtor {
+  id   String @id @default(uuid())
+  nome String
+
+  cidadeId String?
+  cidade   CidadesIBGE? @relation(fields: [cidadeId], references: [id])
+
+  amostras Amostra[]
 }
 
-enum AnalysisStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
+model Responsavel {
+  id   String @id @default(uuid())
+  nome String
+
+  instituicaoId String @unique
+
+  cidadeId String?
+  cidade   CidadesIBGE? @relation(fields: [cidadeId], references: [id])
+
+  analises Analise[]
 }
 
-model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String
-  role      Role     @default(RESEARCHER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model TipoAmostra {
+  id        String  @id @default(uuid())
+  nome      String  @unique
+  descricao String?
+
+  amostras Amostra[]
 }
 
-model Producer {
-  id        String       @id @default(cuid())
-  name      String
-  document  String
-  email     String
-  phone     String
-  type      ProducerType
-  address   String
-  city      String
-  state     String
-  latitude  Float?
-  longitude Float?
-  radius    Float?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  samples   Sample[]
-  apiaries  Apiary[]
+model TipoAnalise {
+  id   String @id @default(uuid())
+  nome String @unique
+
+  analises Analise[]
 }
 
-model Apiary {
-  id         String   @id @default(cuid())
-  name       String
-  latitude   Float
-  longitude  Float
-  altitude   Float?
-  city       String
-  state      String
-  producerId String
-  producer   Producer @relation(fields: [producerId], references: [id])
-  samples    Sample[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Abelha {
+  id             String  @id @default(uuid())
+  nomeCientifico String  @unique
+  nomePopular    String?
+  semFerrao      Boolean @default(true)
+  nativa         Boolean @default(true)
+  descricao      String? @db.Text
+
+  amostras Amostra[]
 }
 
-model Sample {
-  id               String       @id @default(uuid())
-  registrationCode String       @unique
-  beeType          BeeType
-  sampleType       SampleType
-  status           SampleStatus @default(RECEIVED)
-  collectionDate   DateTime
-  receivedAt       DateTime     @default(now())
-  producerId       String
-  producer         Producer     @relation(fields: [producerId], references: [id])
-  apiaryId         String?
-  apiary           Apiary?      @relation(fields: [apiaryId], references: [id])
-  storageLocation  String?
-  notes            String?
-  analyses         Analysis[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+model FileGroup {
+  id String @id @default(uuid())
+
+  files File[]
+
+  amostra   Amostra? @relation(fields: [amostraId], references: [id])
+  amostraId String?
+
+  analise   Analise? @relation(fields: [analiseId], references: [id])
+  analiseId String?
+
+  @@unique([amostraId, analiseId])
 }
 
-model Analysis {
-  id          String         @id @default(cuid())
-  sampleId    String
-  sample      Sample         @relation(fields: [sampleId], references: [id])
-  type        String
-  parameters  Json?
-  result      String?
-  conclusion  String?
-  analyst     String?
-  startedAt   DateTime?
-  completedAt DateTime?
-  status      AnalysisStatus @default(PENDING)
-  reports     Report[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+model File {
+  id   String   @id @default(uuid())
+  url  String   @unique
+  type FileType @default(IMAGE)
+
+  fileGroupId String
+  fileGroup   FileGroup @relation(fields: [fileGroupId], references: [id], onDelete: Cascade)
 }
 
-model Report {
-  id           String   @id @default(cuid())
-  analysisId   String
-  analysis     Analysis @relation(fields: [analysisId], references: [id])
-  fileName     String
-  fileKey      String
-  fileUrl      String?
-  uploadedBy   String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model PontoColeta {
+  id        String @id @default(uuid())
+  nome      String
+  latitude  Float
+  longitude Float
+  raio      Float?
+
+  cidadeId String
+  cidade   CidadesIBGE @relation(fields: [cidadeId], references: [id])
+
+  amostras Amostra[]
+}
+
+model Amostra {
+  id         String   @id @default(uuid())
+  nome       String
+  dataColeta DateTime
+
+  pontoColetaId String
+  pontoColeta   PontoColeta @relation(fields: [pontoColetaId], references: [id])
+
+  abelhaId String
+  abelha   Abelha @relation(fields: [abelhaId], references: [id])
+
+  produtorId String
+  produtor   Produtor @relation(fields: [produtorId], references: [id])
+
+  tipoAmostraId String
+  tipoAmostra   TipoAmostra @relation(fields: [tipoAmostraId], references: [id])
+
+  analises  Analise[]
+  fileGroup FileGroup[]
+}
+
+model Analise {
+  id String @id @default(uuid())
+
+  amostraId String
+  amostra   Amostra @relation(fields: [amostraId], references: [id], onDelete: Cascade)
+
+  tipoAnaliseId String
+  tipoAnalise   TipoAnalise @relation(fields: [tipoAnaliseId], references: [id])
+
+  responsavelId String
+  responsavel   Responsavel @relation(fields: [responsavelId], references: [id])
+
+  fileGroup FileGroup[]
 }

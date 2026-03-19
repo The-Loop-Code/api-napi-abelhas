@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import type { CreateAnalysisDto } from './dto/create-analysis.dto';
 import type { UpdateAnalysisDto } from './dto/update-analysis.dto';
 
@@ -9,55 +8,47 @@ export class AnalysisService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateAnalysisDto) {
-    return this.prisma.analysis.create({
-      data: {
-        ...dto,
-        parameters: dto.parameters as Prisma.InputJsonValue,
-      },
-      include: { sample: true },
+    return this.prisma.analise.create({
+      data: dto,
+      include: { amostra: true, tipoAnalise: true, responsavel: true },
     });
   }
 
   async findAll() {
-    return this.prisma.analysis.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { sample: true },
+    return this.prisma.analise.findMany({
+      include: { amostra: true, tipoAnalise: true, responsavel: true },
     });
   }
 
-  async findBySample(sampleId: string) {
-    return this.prisma.analysis.findMany({
-      where: { sampleId },
-      orderBy: { createdAt: 'desc' },
-      include: { reports: true },
+  async findByAmostra(amostraId: string) {
+    return this.prisma.analise.findMany({
+      where: { amostraId },
+      include: { tipoAnalise: true, responsavel: true },
     });
   }
 
   async findOne(id: string) {
-    const analysis = await this.prisma.analysis.findUnique({
+    const analysis = await this.prisma.analise.findUnique({
       where: { id },
-      include: { sample: true, reports: true },
+      include: { amostra: true, tipoAnalise: true, responsavel: true, fileGroup: true },
     });
     if (!analysis) {
-      throw new NotFoundException(`Analysis with id ${id} not found`);
+      throw new NotFoundException(`Analise with id ${id} not found`);
     }
     return analysis;
   }
 
   async update(id: string, dto: UpdateAnalysisDto) {
     await this.findOne(id);
-    return this.prisma.analysis.update({
+    return this.prisma.analise.update({
       where: { id },
-      data: {
-        ...dto,
-        parameters: dto.parameters as Prisma.InputJsonValue,
-      },
-      include: { sample: true },
+      data: dto,
+      include: { amostra: true, tipoAnalise: true, responsavel: true },
     });
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.analysis.delete({ where: { id } });
+    return this.prisma.analise.delete({ where: { id } });
   }
 }
