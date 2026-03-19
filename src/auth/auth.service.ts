@@ -1,5 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Webhook } from 'svix';
 
@@ -15,10 +14,9 @@ export interface ClerkWebhookEvent {
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private prisma: PrismaService,
-    private configService: ConfigService,
-  ) {}
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(private configService: ConfigService) {}
 
   verifyWebhook(
     payload: string,
@@ -41,46 +39,6 @@ export class AuthService {
   }
 
   async handleWebhookEvent(event: ClerkWebhookEvent): Promise<void> {
-    switch (event.type) {
-      case 'user.created': {
-        const emailAddress =
-          event.data.email_addresses?.[0]?.email_address ?? '';
-        const name =
-          [event.data.first_name, event.data.last_name]
-            .filter(Boolean)
-            .join(' ') || emailAddress;
-
-        await this.prisma.user.upsert({
-          where: { clerkId: event.data.id },
-          update: { email: emailAddress, name },
-          create: {
-            clerkId: event.data.id,
-            email: emailAddress,
-            name,
-          },
-        });
-        break;
-      }
-      case 'user.updated': {
-        const emailAddress =
-          event.data.email_addresses?.[0]?.email_address ?? '';
-        const name =
-          [event.data.first_name, event.data.last_name]
-            .filter(Boolean)
-            .join(' ') || emailAddress;
-
-        await this.prisma.user.updateMany({
-          where: { clerkId: event.data.id },
-          data: { email: emailAddress, name },
-        });
-        break;
-      }
-      case 'user.deleted': {
-        await this.prisma.user.deleteMany({
-          where: { clerkId: event.data.id },
-        });
-        break;
-      }
-    }
+    this.logger.log(`Received webhook event: ${event.type} for user ${event.data.id}`);
   }
 }

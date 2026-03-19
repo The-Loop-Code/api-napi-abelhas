@@ -1,12 +1,15 @@
 import { z } from 'zod';
 
 export const updateSampleSchema = z.object({
-  status: z
-    .enum(['RECEIVED', 'IN_ANALYSIS', 'COMPLETED', 'REJECTED'])
+  nome: z.string().min(1).optional(),
+  dataColeta: z
+    .string()
+    .transform((val) => new Date(val))
     .optional(),
-  storageLocation: z.string().optional(),
-  notes: z.string().optional(),
-  apiaryId: z.string().optional(),
+  pontoColetaId: z.string().min(1).optional(),
+  abelhaId: z.string().min(1).optional(),
+  produtorId: z.string().min(1).optional(),
+  tipoAmostraId: z.string().min(1).optional(),
 });
 
 export type UpdateSampleDto = z.infer<typeof updateSampleSchema>;

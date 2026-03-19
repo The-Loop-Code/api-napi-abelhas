@@ -2,27 +2,23 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ProducersService } from './producers.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ProducerType } from '@prisma/client';
 
 const mockProducer = {
   id: 'producer-id-1',
-  name: 'João da Silva',
-  document: '123.456.789-00',
-  email: 'joao@example.com',
-  phone: '(11) 99999-9999',
-  type: ProducerType.APICULTOR,
-  address: 'Rua das Flores, 123',
-  city: 'São Paulo',
-  state: 'SP',
-  latitude: -23.5489,
-  longitude: -46.6388,
-  radius: 5.0,
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  nome: 'João da Silva',
+  cidadeId: 'cidade-id-1',
+  cidade: {
+    id: 'cidade-id-1',
+    codigoIBGE: '3550308',
+    cidade: 'São Paulo',
+    estado: 'SP',
+    regiao: 'SUDESTE',
+    bioma: 'MATA_ATLANTICA',
+  },
 };
 
 const mockPrismaService = {
-  producer: {
+  produtor: {
     create: jest.fn(),
     findMany: jest.fn(),
     findUnique: jest.fn(),
@@ -48,38 +44,29 @@ describe('ProducersService', () => {
 
   describe('create', () => {
     it('should create a producer', async () => {
-      mockPrismaService.producer.create.mockResolvedValueOnce(mockProducer);
+      mockPrismaService.produtor.create.mockResolvedValueOnce(mockProducer);
 
       const dto = {
-        name: 'João da Silva',
-        document: '123.456.789-00',
-        email: 'joao@example.com',
-        phone: '(11) 99999-9999',
-        type: ProducerType.APICULTOR,
-        address: 'Rua das Flores, 123',
-        city: 'São Paulo',
-        state: 'SP',
-        latitude: -23.5489,
-        longitude: -46.6388,
-        radius: 5.0,
+        nome: 'João da Silva',
+        cidadeId: 'cidade-id-1',
       };
 
       const result = await service.create(dto);
       expect(result).toEqual(mockProducer);
-      expect(mockPrismaService.producer.create).toHaveBeenCalledWith({
+      expect(mockPrismaService.produtor.create).toHaveBeenCalledWith({
         data: dto,
       });
     });
   });
 
   describe('findAll', () => {
-    it('should return all producers ordered by createdAt desc', async () => {
-      mockPrismaService.producer.findMany.mockResolvedValueOnce([mockProducer]);
+    it('should return all producers with cidade included', async () => {
+      mockPrismaService.produtor.findMany.mockResolvedValueOnce([mockProducer]);
 
       const result = await service.findAll();
       expect(result).toEqual([mockProducer]);
-      expect(mockPrismaService.producer.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ orderBy: { createdAt: 'desc' } }),
+      expect(mockPrismaService.produtor.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ include: { cidade: true } }),
       );
     });
   });
@@ -88,10 +75,9 @@ describe('ProducersService', () => {
     it('should return a producer by id', async () => {
       const producerWithRelations = {
         ...mockProducer,
-        samples: [],
-        apiaries: [],
+        amostras: [],
       };
-      mockPrismaService.producer.findUnique.mockResolvedValueOnce(
+      mockPrismaService.produtor.findUnique.mockResolvedValueOnce(
         producerWithRelations,
       );
 
@@ -100,7 +86,7 @@ describe('ProducersService', () => {
     });
 
     it('should throw NotFoundException when producer not found', async () => {
-      mockPrismaService.producer.findUnique.mockResolvedValueOnce(null);
+      mockPrismaService.produtor.findUnique.mockResolvedValueOnce(null);
 
       await expect(service.findOne('nonexistent-id')).rejects.toThrow(
         NotFoundException,
@@ -110,36 +96,34 @@ describe('ProducersService', () => {
 
   describe('update', () => {
     it('should update a producer', async () => {
-      const updated = { ...mockProducer, name: 'João Silva Updated' };
-      mockPrismaService.producer.findUnique.mockResolvedValueOnce({
+      const updated = { ...mockProducer, nome: 'João Silva Updated' };
+      mockPrismaService.produtor.findUnique.mockResolvedValueOnce({
         ...mockProducer,
-        samples: [],
-        apiaries: [],
+        amostras: [],
       });
-      mockPrismaService.producer.update.mockResolvedValueOnce(updated);
+      mockPrismaService.produtor.update.mockResolvedValueOnce(updated);
 
       const result = await service.update('producer-id-1', {
-        name: 'João Silva Updated',
+        nome: 'João Silva Updated',
       });
-      expect(result.name).toBe('João Silva Updated');
+      expect(result.nome).toBe('João Silva Updated');
     });
   });
 
   describe('remove', () => {
     it('should delete a producer', async () => {
-      mockPrismaService.producer.findUnique.mockResolvedValueOnce({
+      mockPrismaService.produtor.findUnique.mockResolvedValueOnce({
         ...mockProducer,
-        samples: [],
-        apiaries: [],
+        amostras: [],
       });
-      mockPrismaService.producer.delete.mockResolvedValueOnce(mockProducer);
+      mockPrismaService.produtor.delete.mockResolvedValueOnce(mockProducer);
 
       const result = await service.remove('producer-id-1');
       expect(result).toEqual(mockProducer);
     });
 
     it('should throw NotFoundException when trying to delete non-existent producer', async () => {
-      mockPrismaService.producer.findUnique.mockResolvedValueOnce(null);
+      mockPrismaService.produtor.findUnique.mockResolvedValueOnce(null);
 
       await expect(service.remove('nonexistent-id')).rejects.toThrow(
         NotFoundException,

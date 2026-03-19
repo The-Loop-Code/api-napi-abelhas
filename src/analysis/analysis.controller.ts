@@ -33,9 +33,9 @@ export class AnalysisController {
     return this.analysisService.findAll();
   }
 
-  @Get('sample/:sampleId')
-  findBySample(@Param('sampleId') sampleId: string) {
-    return this.analysisService.findBySample(sampleId);
+  @Get('amostra/:amostraId')
+  findByAmostra(@Param('amostraId') amostraId: string) {
+    return this.analysisService.findByAmostra(amostraId);
   }
 
   @Get(':id')
