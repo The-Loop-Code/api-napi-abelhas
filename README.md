@@ -1,6 +1,19 @@
 # api-napi-abelhas
 
-API RESTful modular desenvolvida com **NestJS + TypeScript** para a plataforma de gerenciamento de amostras laboratoriais do **NAPI Abelhas** (mel, pólen, própolis).
+API RESTful desenvolvida com **NestJS + TypeScript** para a plataforma de gerenciamento de amostras laboratoriais do **NAPI Abelhas** (mel, pólen, própolis).
+
+## 🏗️ Arquitetura
+
+O projeto segue uma arquitetura **Clean**, **DRY**, **SOLID** e **Modular**, com separação clara de responsabilidades em quatro camadas:
+
+| Camada | Responsabilidade | Princípios |
+|--------|------------------|------------|
+| **Controller** | Entrada HTTP, validação de payload via DTOs e delegação ao Service | SRP, Clean |
+| **Service** | Regras de negócio, validação de existência e orquestração de operações | SRP, DIP, Clean |
+| **DTO** | Definição e validação da forma dos dados com Zod (schema + tipo inferido) | ISP, DRY |
+| **Repository** | Acesso ao banco de dados via `PrismaService` (módulo global) | SRP, DIP, DRY |
+
+> 📖 Documentação completa: [wiki/06-arquitetura.md](./wiki/06-arquitetura.md)
 
 ## 🛠️ Stack Tecnológica
 

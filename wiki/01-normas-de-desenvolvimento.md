@@ -4,21 +4,25 @@
 
 Este documento estabelece as normas que todos os colaboradores do projeto **api-napi-abelhas** devem seguir para garantir consistência, manutenibilidade e qualidade do código.
 
+O projeto adota os princípios **Clean Architecture**, **DRY**, **SOLID** e **Modular**. Para a descrição completa da arquitetura e das camadas (Controller, Service, DTO e Repository), consulte [06-arquitetura.md](./06-arquitetura.md).
+
 ---
 
 ## 1. Estrutura de Módulos
 
-O projeto segue a arquitetura modular do NestJS. Cada domínio de negócio deve ser encapsulado em um módulo próprio com a seguinte estrutura:
+O projeto segue a arquitetura modular do NestJS, combinada com princípios Clean e SOLID. Cada domínio de negócio é encapsulado em um módulo próprio com quatro camadas bem definidas:
 
 ```
 src/<nome-do-modulo>/
-  <nome>.controller.ts   # Rotas HTTP e entrada de dados
-  <nome>.service.ts      # Lógica de negócio
-  <nome>.module.ts       # Declaração do módulo NestJS
+  <nome>.controller.ts   # Controller — rotas HTTP e validação de entrada
+  <nome>.service.ts      # Service — regras de negócio
+  <nome>.module.ts       # Module — declaração NestJS (providers + controllers)
   dto/
-    create-<nome>.dto.ts  # Schema Zod + tipo TypeScript para criação
-    update-<nome>.dto.ts  # Schema Zod + tipo TypeScript para atualização
+    create-<nome>.dto.ts  # DTO — schema Zod + tipo TypeScript para criação
+    update-<nome>.dto.ts  # DTO — schema Zod + tipo TypeScript para atualização
 ```
+
+O acesso ao banco de dados (Repository) é feito via `PrismaService`, um módulo global que não precisa ser importado individualmente.
 
 Exemplos existentes: `producers`, `samples`, `analysis`, `abelhas`, `pontos-coleta`.
 
@@ -39,6 +43,8 @@ Exemplos existentes: `producers`, `samples`, `analysis`, `abelhas`, `pontos-cole
 
 ## 3. Rotas e Controllers
 
+Os Controllers são a **camada de entrada HTTP** (Clean Architecture). Devem apenas mapear rotas para o Service, sem conter lógica de negócio.
+
 - O decorator `@Controller()` deve receber o nome do recurso no plural e em inglês quando possível (ex.: `@Controller('producers')`, `@Controller('samples')`).
 - Rotas seguem REST padrão:
   - `GET /recurso` → listar todos
@@ -50,9 +56,11 @@ Exemplos existentes: `producers`, `samples`, `analysis`, `abelhas`, `pontos-cole
 
 ---
 
-## 4. Serviços e Lógica de Negócio
+## 4. Serviços (Service) e Lógica de Negócio
 
-- A injeção do `PrismaService` deve ser feita pelo construtor (`constructor(private prisma: PrismaService)`).
+Os Services são a **camada de regras de negócio** (Clean Architecture). Recebem dependências via injeção (SOLID — DIP) e nunca acessam detalhes de HTTP.
+
+- A injeção do `PrismaService` (Repository) deve ser feita pelo construtor (`constructor(private prisma: PrismaService)`).
 - Antes de qualquer operação de `update` ou `remove`, o serviço **deve** chamar `findOne(id)` para garantir que o recurso existe e lançar `NotFoundException` se não for encontrado.
 - Métodos de serviço devem ser `async` e retornar diretamente o resultado do Prisma (sem wrappers desnecessários).
 
