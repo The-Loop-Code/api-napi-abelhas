@@ -4,7 +4,18 @@ import type { Request } from 'express';
 import { ROLES_KEY } from '@/common/decorators/roles.decorator';
 
 interface AuthenticatedUser {
-  role?: string;
+  org_role?: string;
+}
+
+/**
+ * Normalizes a Clerk organization role (e.g. "org:admin") to a plain
+ * upper-case string ("ADMIN") so it can be compared against the values
+ * used in @Roles() decorators.
+ */
+function normalizeRole(role: string | undefined): string | undefined {
+  if (!role) return undefined;
+  const stripped = role.startsWith('org:') ? role.slice(4) : role;
+  return stripped.toUpperCase();
 }
 
 @Injectable()
@@ -25,6 +36,9 @@ export class RolesGuard implements CanActivate {
       .switchToHttp()
       .getRequest<Request & { user: AuthenticatedUser }>();
     const user = request.user;
-    return requiredRoles.some((role) => user?.role === role);
+
+    const orgRole = normalizeRole(user?.org_role);
+
+    return requiredRoles.some((role) => orgRole === role.toUpperCase());
   }
 }

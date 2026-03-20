@@ -67,11 +67,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
     switch (exception.code) {
       // Unique constraint violation
       case 'P2002': {
-        const target = (exception.meta?.target as string[]) ?? [];
+        this.logger.debug({ meta: exception.meta }, 'P2002 meta');
+        const raw =
+          exception.meta?.target ??
+          exception.meta?.constraint ??
+          exception.meta?.field_name;
+        const fields = Array.isArray(raw)
+          ? raw.join(', ')
+          : typeof raw === 'string'
+            ? raw
+            : 'desconhecido';
+        const model = (exception.meta?.modelName as string) ?? '';
+        const where = model ? ` em ${model}` : '';
         return {
           status: HttpStatus.CONFLICT,
           body: {
-            message: `Unique constraint violation on: ${target.join(', ')}`,
+            message: `Já existe um registro${where} com o mesmo valor para: ${fields}`,
           },
         };
       }

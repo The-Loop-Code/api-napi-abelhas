@@ -12,7 +12,7 @@ import type { RawBodyRequest } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ClerkAuthGuard } from '@/common/guards/clerk-auth.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import type { ClerkJwtPayload } from './strategies/clerk-jwt.strategy';
+import type { ClerkUser } from './strategies/clerk-jwt.strategy';
 import type { Request } from 'express';
 
 @Controller('auth')
@@ -21,7 +21,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(ClerkAuthGuard)
-  me(@CurrentUser() user: ClerkJwtPayload) {
+  me(@CurrentUser() user: ClerkUser): ClerkUser {
     return user;
   }
 

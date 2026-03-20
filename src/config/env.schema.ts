@@ -13,7 +13,12 @@ export const envSchema = z.object({
   CLERK_PUBLISHABLE_KEY: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
   CLERK_WEBHOOK_SECRET: z.string().optional(),
-  CLERK_JWKS_URI: z.string().default('https://api.clerk.com/v1/jwks'),
+  CLERK_JWKS_URI: z
+    .string()
+    .default(
+      'https://distinct-whale-78.clerk.accounts.dev/.well-known/jwks.json',
+    ),
+  FRONTEND_URL: z.string().default('http://localhost:3001'),
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z
     .enum(['development', 'production', 'test'])

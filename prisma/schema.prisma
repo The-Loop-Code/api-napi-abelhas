@@ -60,6 +60,15 @@ enum FileType {
   OUTROS
 }
 
+enum StatusAnalise {
+  PENDENTE
+  EM_PREPARO
+  AGUARDANDO_RESULTADO
+  EM_REVISAO
+  CONCLUIDA
+  REJEITADA
+}
+
 model CidadesIBGE {
   id         String @id @default(uuid())
   codigoIBGE String @unique
@@ -74,18 +83,25 @@ model CidadesIBGE {
 }
 
 model Produtor {
-  id   String @id @default(uuid())
-  nome String
+  id    String @id @default(uuid())
+  orgId String
+  nome  String
 
   cidadeId String?
   cidade   CidadesIBGE? @relation(fields: [cidadeId], references: [id])
 
   amostras Amostra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
 }
 
 model Responsavel {
-  id   String @id @default(uuid())
-  nome String
+  id    String @id @default(uuid())
+  orgId String
+  nome  String
 
   instituicaoId String @unique
 
@@ -93,6 +109,11 @@ model Responsavel {
   cidade   CidadesIBGE? @relation(fields: [cidadeId], references: [id])
 
   analises Analise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
 }
 
 model TipoAmostra {
@@ -101,6 +122,9 @@ model TipoAmostra {
   descricao String?
 
   amostras Amostra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TipoAnalise {
@@ -108,6 +132,9 @@ model TipoAnalise {
   nome String @unique
 
   analises Analise[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Abelha {
@@ -119,10 +146,14 @@ model Abelha {
   descricao      String? @db.Text
 
   amostras Amostra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model FileGroup {
-  id String @id @default(uuid())
+  id    String @id @default(uuid())
+  orgId String
 
   files File[]
 
@@ -132,7 +163,11 @@ model FileGroup {
   analise   Analise? @relation(fields: [analiseId], references: [id])
   analiseId String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([amostraId, analiseId])
+  @@index([orgId])
 }
 
 model File {
@@ -140,12 +175,19 @@ model File {
   url  String   @unique
   type FileType @default(IMAGE)
 
+  uploadedByUserId String?
+  uploadedByName   String?
+
   fileGroupId String
   fileGroup   FileGroup @relation(fields: [fileGroupId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PontoColeta {
   id        String @id @default(uuid())
+  orgId     String
   nome      String
   latitude  Float
   longitude Float
@@ -155,10 +197,16 @@ model PontoColeta {
   cidade   CidadesIBGE @relation(fields: [cidadeId], references: [id])
 
   amostras Amostra[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
 }
 
 model Amostra {
   id         String   @id @default(uuid())
+  orgId      String
   nome       String
   dataColeta DateTime
 
@@ -176,10 +224,18 @@ model Amostra {
 
   analises  Analise[]
   fileGroup FileGroup[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
 }
 
 model Analise {
-  id String @id @default(uuid())
+  id    String @id @default(uuid())
+  orgId String
+
+  status StatusAnalise @default(PENDENTE)
 
   amostraId String
   amostra   Amostra @relation(fields: [amostraId], references: [id], onDelete: Cascade)
@@ -191,4 +247,9 @@ model Analise {
   responsavel   Responsavel @relation(fields: [responsavelId], references: [id])
 
   fileGroup FileGroup[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orgId])
 }

@@ -57,6 +57,24 @@ export class AuthService {
       case 'user.deleted':
         this.logger.log(`User deleted — id: ${data.id}`);
         break;
+      case 'organization.created':
+        this.logger.log(`Organization created — id: ${data.id}`);
+        break;
+      case 'organization.updated':
+        this.logger.log(`Organization updated — id: ${data.id}`);
+        break;
+      case 'organization.deleted':
+        this.logger.log(`Organization deleted — id: ${data.id}`);
+        break;
+      case 'organizationMembership.created':
+        this.logger.log(`Organization membership created — id: ${data.id}`);
+        break;
+      case 'organizationMembership.updated':
+        this.logger.log(`Organization membership updated — id: ${data.id}`);
+        break;
+      case 'organizationMembership.deleted':
+        this.logger.log(`Organization membership deleted — id: ${data.id}`);
+        break;
       default:
         this.logger.warn(`Unhandled webhook event type: ${type}`);
     }
